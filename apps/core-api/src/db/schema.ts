@@ -1,5 +1,10 @@
-import { pgTable, uuid, text, varchar, timestamp, boolean, integer, date } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, varchar, timestamp, boolean, integer, date, pgEnum } from 'drizzle-orm/pg-core'
 import { userRoleEnum, userVersionEnum, accountStatusEnum, userGenderEnum } from './enums'
+
+// Definizione degli ENUM
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'manager'])
+export const accountStatusEnum = pgEnum('account_status', ['active', 'suspended', 'deactivated'])
+export const userGenderEnum = pgEnum('user_gender', ['male', 'female', 'other', 'prefer_not_to_say'])
 
 // Definizione della tabella users
 export const users = pgTable('users', {
@@ -20,9 +25,9 @@ export const users = pgTable('users', {
   immagine_profilo: varchar('immagine_profilo', { length: 255 }),
 
   // Configurazione account
-  versione: userVersionEnum('versione').notNull(),
+  versione: varchar('versione', { length: 50 }).notNull(),
   ruolo: userRoleEnum('ruolo').notNull().default('user'),
-  seriale_gioiello: varchar('seriale_gioiello', { length: 255 }),
+  seriale_gioielliere: varchar('seriale_gioielliere', { length: 100 }),
 
   // Collegamenti
   sezione_id: uuid('sezione_id').notNull(), // FK verso eterna_sections
@@ -31,7 +36,7 @@ export const users = pgTable('users', {
   // Verifiche e stato
   email_verificata: boolean('email_verificata').default(false),
   telefono_verificato: boolean('telefono_verificato').default(false),
-  stato_account: accountStatusEnum('stato_account').default('attivo'),
+  stato_account: accountStatusEnum('stato_account').notNull(),
 
   // Sicurezza e Autenticazione
   token_verifica_email: varchar('token_verifica_email', { length: 255 }).unique(),

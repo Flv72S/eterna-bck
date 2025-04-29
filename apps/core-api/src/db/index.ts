@@ -10,4 +10,16 @@ const pool = new Pool({
   database: 'eterna_db'
 })
 
-export const db = drizzle(pool, { schema }) 
+export const db = drizzle(pool, { schema })
+
+export async function testConnection() {
+  try {
+    const result = await db.select().from(schema.users)
+    console.log('Connessione al database riuscita!')
+    console.log('Numero di utenti nel database:', result.length)
+    return result
+  } catch (error) {
+    console.error('Errore durante la connessione al database:', error)
+    throw error
+  }
+} 
