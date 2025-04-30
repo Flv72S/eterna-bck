@@ -1,19 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
-import { AnyZodObject } from 'zod';
+import { AnyZodObject, ZodError } from 'zod';
 
-export const validateRequest = (schema: AnyZodObject) => 
-  async (req: Request, res: Response, next: NextFunction) => {
+export const validateRequest = (schema: AnyZodObject) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       await schema.parseAsync({
         body: req.body,
         query: req.query,
         params: req.params,
       });
-      return next();
+      next();
     } catch (error) {
-      return res.status(400).json({
-        message: 'Dati non validi',
-        errors: error.errors
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          message: 'Dati non validi',
+          errors: error.errors
+        });
+      }
+      return res.status(500).json({
+        message: 'Errore interno del server'
       });
     }
-  }; 
+  };
+}; 

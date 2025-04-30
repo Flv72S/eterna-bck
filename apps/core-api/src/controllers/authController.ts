@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, User, NewUser } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { RegisterInput, LoginInput } from '../schemas/auth';
 
@@ -25,16 +25,21 @@ export const register = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Creazione nuovo utente
-    const [newUser] = await db.insert(users).values({
+    const newUserData: NewUser = {
       email,
       pin: hashedPassword,
       nome,
       cognome,
       telefono,
       versione,
-      sezione_id,
+      sezione_id: sezione_id.toString(),
+      stato_account: 'attivo',
+      ruolo: 'user',
       ultima_login: new Date()
-    }).returning();
+    };
+
+    const result = await db.insert(users).values(newUserData).returning();
+    const newUser = result[0] as User;
 
     return res.status(201).json({
       message: 'Utente registrato con successo',

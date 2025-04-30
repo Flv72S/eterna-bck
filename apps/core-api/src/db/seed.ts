@@ -15,8 +15,10 @@ async function seed() {
       versione: 'premium',
       ruolo: 'superadmin',
       sezione_id: '00000000-0000-0000-0000-000000000000', // UUID temporaneo
+      stato_account: 'attivo',
       email_verificata: true,
-      telefono_verificato: true
+      telefono_verificato: true,
+      ultima_login: new Date()
     })
 
     console.log('Seed completato con successo!')

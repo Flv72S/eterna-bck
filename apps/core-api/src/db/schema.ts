@@ -1,10 +1,6 @@
 import { pgTable, uuid, text, varchar, timestamp, boolean, integer, date, pgEnum } from 'drizzle-orm/pg-core'
 import { userRoleEnum, userVersionEnum, accountStatusEnum, userGenderEnum } from './enums'
-
-// Definizione degli ENUM
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'manager'])
-export const accountStatusEnum = pgEnum('account_status', ['active', 'suspended', 'deactivated'])
-export const userGenderEnum = pgEnum('user_gender', ['male', 'female', 'other', 'prefer_not_to_say'])
+import { InferModel } from 'drizzle-orm';
 
 // Definizione della tabella users
 export const users = pgTable('users', {
@@ -31,7 +27,7 @@ export const users = pgTable('users', {
 
   // Collegamenti
   sezione_id: uuid('sezione_id').notNull(), // FK verso eterna_sections
-  riferito_da: uuid('riferito_da').references(() => users.id, { onDelete: 'set null' }),
+  riferito_da: uuid('riferito_da'),
 
   // Verifiche e stato
   email_verificata: boolean('email_verificata').default(false),
@@ -48,19 +44,10 @@ export const users = pgTable('users', {
   tentativi_login_falliti: integer('tentativi_login_falliti').default(0),
   bloccato_fino_a: timestamp('bloccato_fino_a', { withTimezone: true }),
   ultimo_indirizzo_ip: varchar('ultimo_indirizzo_ip', { length: 45 }),
-  user_agent_ultimo_login: text('user_agent_ultimo_login'),
+  ultima_login: timestamp('ultima_login', { withTimezone: true }),
+  data_creazione: timestamp('data_creazione', { withTimezone: true }).defaultNow(),
+  data_aggiornamento: timestamp('data_aggiornamento', { withTimezone: true }).defaultNow()
+});
 
-  // Preferenze Utente
-  notifiche_email_attive: boolean('notifiche_email_attive').default(true),
-  notifiche_sms_attive: boolean('notifiche_sms_attive').default(false),
-  tema_preferito: varchar('tema_preferito', { length: 20 }).default('light'),
-  fuso_orario: varchar('fuso_orario', { length: 50 }),
-
-  // Timestamps
-  ultima_login: timestamp('ultima_login'),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
-  data_ultimo_aggiornamento_profilo: timestamp('data_ultimo_aggiornamento_profilo', { withTimezone: true }),
-  termini_e_condizioni_accettati_il: timestamp('termini_e_condizioni_accettati_il', { withTimezone: true }),
-  privacy_policy_accettata_il: timestamp('privacy_policy_accettata_il', { withTimezone: true })
-}) 
+export type User = InferModel<typeof users>;
+export type NewUser = InferModel<typeof users, "insert">; 
